@@ -1,3 +1,14 @@
 *.pyc
 *.swp
 *.egg-info
+.idea/
+build/
+dist/
+
+
+
+
+
+
+
+
