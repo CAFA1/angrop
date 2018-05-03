@@ -1,15 +1,11 @@
 #coding=utf-8 #coding:utf-8
-class Parent(object):
-   def myMethod(self):
-      print ('调用父类方法')
-      self.process()
-
-class Child(Parent):
-   def myMethod(self):
-      print ('调用子类方法')
-   def process(self):
-      print 'here'
-
-c = Child()
-c.myMethod()
-super(Child,c).myMethod()
+import angr
+#logging.getLogger("angrop").setLevel('DEBUG')
+p = angr.Project("/bin/ls")
+irsb = p.factory.block(0x4022cd)
+irsb_n=irsb.vex.next
+'''
+.init:00000000004022CD                 add     rsp, 8
+.init:00000000004022D1                 retn
+'''
+print 'ok'
