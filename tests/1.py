@@ -1,9 +1,10 @@
 #coding=utf-8 #coding:utf-8
+#pyvex test
 import angr
-#logging.getLogger("angrop").setLevel('DEBUG')
+import pyvex
+import archinfo
 proj = angr.Project("/bin/ls")
 state = proj.factory.entry_state()
-input = state.solver.BVS('input', 64)
-state.solver.add(input < 2**32)
-a=state.satisfiable()
+irsb=proj.factory.block(0x4022cd)
+
 print 'ok'
