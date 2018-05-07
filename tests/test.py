@@ -1,6 +1,6 @@
 import angr, angrop
 import logging
-logging.getLogger("angrop").setLevel('DEBUG')
+#logging.getLogger("angrop").setLevel('DEBUG')
 p = angr.Project("/bin/ls")
 rop = p.analyses.ROP()
 rop.find_gadgets()
