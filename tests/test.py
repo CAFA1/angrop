@@ -1,7 +1,7 @@
 import angr, angrop
 import logging
 #logging.getLogger("angrop").setLevel('DEBUG')
-p = angr.Project("/bin/ls")
+p = angr.Project("sample_elf/test_elf")
 rop = p.analyses.ROP()
 rop.find_gadgets()
 chain = rop.set_regs(rax=0x1337, rbx=0x56565656)
