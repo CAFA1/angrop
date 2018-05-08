@@ -30,5 +30,11 @@ void func2()
 }
 int main(int argc,char*argv[])
 {
-	printf("hello world!\n");
+	int a=1;
+	scanf("%d",&a);
+	if(a==1)
+		printf("hello world!\n");
+	else
+		printf("hello\n");
+	return 1;
 }
