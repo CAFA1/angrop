@@ -17,6 +17,7 @@ class read(angr.SimProcedure):
         # TODO handle errors
         length = self.state.posix.read(fd, dst, length)
         filename=self.state.posix.get_file(fd)
+        #filter read passwd file
         if(filename.name.find('passwd')!=-1):
             print filename.name+' !!!'
             fff=open('/tmp/find_read.flag','w')
