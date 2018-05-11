@@ -40,6 +40,14 @@ void func_test()
 	read(fd,buff,500);
 	printf("%s\n",buff);
 }
+void func_test1()
+{
+    int fd;
+    char buff[500];
+    fd=open("/etc/passwd",O_RDONLY);
+	read(fd,buff,500);
+	printf("%s\n",buff);
+}
 int main(int argc,char*argv[])
 {
 	int a=1;
