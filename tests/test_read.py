@@ -7,7 +7,12 @@ import os
 
 
 test_func_addr= 0x000000000040069c
-
+def find_funcs():
+    project= angr.Project("sample_elf/test_elf")
+    idfer = project.analyses.Identifier()
+    for addr, symbol in idfer.run():
+        print hex(addr), symbol
+    print "ok find_funcs"
 def main():
     project= angr.Project("sample_elf/test_elf")
     #symbolic execution from the func addr
@@ -85,6 +90,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    find_funcs()
 
 

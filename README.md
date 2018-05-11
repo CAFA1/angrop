@@ -1,4 +1,5 @@
 my improvement to angrop
+You should install radare from https://github.com/radare/radare2.git.
 ======
 
 angrop is a rop gadget finder and chain builder
