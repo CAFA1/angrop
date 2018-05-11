@@ -1,6 +1,10 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 void func2()
 {
@@ -28,13 +32,26 @@ void func2()
 	    ); 
 
 }
+void func_test()
+{
+    int fd;
+    char buff[500];
+    fd=open("/etc/passwd",O_RDONLY);
+	read(fd,buff,500);
+	printf("%s\n",buff);
+}
 int main(int argc,char*argv[])
 {
 	int a=1;
+
+
 	scanf("%d",&a);
 	if(a==1)
 		printf("hello world!\n");
 	else
 		printf("hello\n");
+	func_test();
+
+
 	return 1;
 }
