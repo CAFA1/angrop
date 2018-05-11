@@ -4,93 +4,78 @@
 
 import angr
 import os
+import r2pipe
 
 
-test_func_addr= 0x000000000040069c
-def find_funcs():
-    project= angr.Project("sample_elf/test_elf")
-    idfer = project.analyses.Identifier()
-    for addr, symbol in idfer.run():
-        print hex(addr), symbol
-    print "ok find_funcs"
+
+#func_name_str
+#return func_addr
+def get_func_addr(r2,func_name_str):
+    #afl list funcs
+    funcs_str = r2.cmd("aaa;afl")
+    funcs_list=funcs_str.split('\n')
+    func_str1=''
+    for tmp in funcs_list:
+        if(tmp.find(func_name_str)!=-1):
+            func_str1=tmp
+            break
+    if(func_str1!=''):
+        func_addr=int(func_str1.split(' ')[0],16)
+        return func_addr
+    return 0
+#get the functions  which call read
+#return list of the functions
+def get_ref_funcs():
+    r2 = r2pipe.open("sample_elf/test_elf")
+    #axt find reference
+    read_str = r2.cmd("aaa;axt sym.imp.read")
+    read_str_list=read_str.split('\n')
+    funcs_name=[]
+    funcs_addr=[]
+    for tmp in read_str_list:
+        funcs_name.append(tmp.split(' ')[0])
+        print tmp.split(' ')[0]
+
+    for tmp in funcs_name:
+        funcs_addr.append((get_func_addr(r2,tmp),tmp))
+        #print hex(get_func_addr(r2,tmp))
+    return funcs_addr
+
+
 def main():
+    #open result log file
+    result_log=open('./result.log','w')
+    #get the funcs addrs which should be analysed
+    func_addr_list=get_ref_funcs()
     project= angr.Project("sample_elf/test_elf")
-    #symbolic execution from the func addr
-    entry_state =  project.factory.blank_state(addr=test_func_addr)
-    pg = project.factory.simgr(entry_state,save_unconstrained=True)
-    os.system('rm /tmp/find_read.flag')
-    findflag=0
-    #symbolic execution until the unconstrained successor
-    while len(pg.unconstrained)==0:
-        if(os.path.isfile('/tmp/find_read.flag')):
-            findflag=1
-            break
-        pg.step()
-    if(len(pg.unconstrained)!=0):
-        unconstrained_path = pg.unconstrained[0]
-    print 'ok'
-
-    '''
-    crashing_input = unconstrained_path.state.posix.dumps(0)
-    #cat crash_input.bin | ./CADET_00001.adapted will segfault
-    unconstrained_path.state.posix.dump(0,"crash_input.bin")
-    print "buffer overflow found!"
-    print repr(crashing_input)
+    for func_addr in func_addr_list:
+        print func_addr[1]+' : '+hex(func_addr[0])
+        result_log.write(func_addr[1]+' : '+hex(func_addr[0]))
+        #symbolic execution from the func addr
+        entry_state =  project.factory.blank_state(addr=func_addr[0])
+        pg = project.factory.simgr(entry_state,save_unconstrained=True)
+        os.system('rm /tmp/find_read.flag')
+        findflag=0
+        #symbolic execution until the unconstrained successor
+        while len(pg.unconstrained)==0:
+            if(os.path.isfile('/tmp/find_read.flag')):
+                result_log.write(' malware!\n')
+                findflag=1
+                break
+            pg.step()
+        #if(len(pg.unconstrained)!=0):
+        #    unconstrained_path = pg.unconstrained[0]
+    result_log.close()
 
 
-    #let's now find the easter egg (it takes about 2 minutes)
-
-    #now we want angr to avoid "unfeasible" paths
-    #by default, "lazy solving" is enabled, this means that angr will not
-    #automatically discard unfeasible paths
-
-    #to disable "lazy solving" we generate a blank path and we change its options,
-    #then we specify this path as the initial path of the path group
-    print "finding the easter egg..."
-    path = project.factory.path()
-    path.state.options.discard("LAZY_SOLVES")
-    pg = project.factory.path_group(path)
-
-    #at this point we just ask angr to reach the basic block where the easter egg
-    #text is printed
-    pg.explore(find=0x804833E)
-    found = pg.found[0]
-    solution1 = found.state.posix.dumps(0)
-    print "easter egg found!"
-    print repr(solution1)
-    found.state.posix.dump(0,"easteregg_input1.bin")
-    #you can even check if the easter egg has been found by checking stdout
-    stdout1 = found.state.posix.dumps(1)
-    print repr(stdout1)
-
-    #an alternative way to avoid unfeasible paths (paths that contain an unsatisfiable set
-    #of constraints) is to "manually" step the path group execution and call prune()
-    print "finding the easter egg (again)..."
-    pg = project.factory.path_group()
-    while True:
-        pg.step()
-        pg.prune() #we "manually" ask angr to remove unfeasible paths
-        found_list = [active for active in pg.active if active.addr == 0x804833E]
-        if len(found_list) > 0:
-            break
-    found = found_list[0]
-    solution2 = found.state.posix.dumps(0)
-    print "easter egg found!"
-    print repr(solution2)
-    found.state.posix.dump(0,"easteregg_input2.bin")
-    #you can even check if the easter egg has been found by checking stdout
-    stdout2 = found.state.posix.dumps(1)
-    print repr(stdout2)
-
-    return (crashing_input, solution1, stdout1, solution2, stdout2)
-    '''
 
 
 
 
 
 if __name__ == '__main__':
-    #main()
-    find_funcs()
+    main()
+
+    print 'ok main'
 
 
