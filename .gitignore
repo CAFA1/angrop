@@ -4,7 +4,7 @@
 .idea/
 build/
 dist/
-
+tests/sample_elf/.gdb_history
 
 
 
