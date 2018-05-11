@@ -12,14 +12,17 @@ def main():
     project= angr.Project("sample_elf/test_elf")
     #symbolic execution from the func addr
     entry_state =  project.factory.blank_state(addr=test_func_addr)
-    pg = project.factory.path_group(entry_state,save_unconstrained=True)
-    os.system('rm find_read.flag')
+    pg = project.factory.simgr(entry_state,save_unconstrained=True)
+    os.system('rm /tmp/find_read.flag')
+    findflag=0
     #symbolic execution until the unconstrained successor
     while len(pg.unconstrained)==0:
-        if(os.path.isfile('find_read.flag'))
+        if(os.path.isfile('/tmp/find_read.flag')):
+            findflag=1
             break
         pg.step()
-    unconstrained_path = pg.unconstrained[0]
+    if(len(pg.unconstrained)!=0):
+        unconstrained_path = pg.unconstrained[0]
     print 'ok'
 
     '''
