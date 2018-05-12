@@ -21,5 +21,11 @@ class read(angr.SimProcedure):
         if(filename.name.find('passwd')!=-1):
             print filename.name+' !!!'
             fff=open('/tmp/find_read.flag','w')
+            fff.write(filename.name)
+            fff.close()
+        else:
+            #log every file name
+            fff=open('/tmp/find_read.flag','w')
+            fff.write(filename.name)
             fff.close()
         return length

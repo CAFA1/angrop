@@ -1,2 +1,1 @@
-sym.func_test1 : 0x400712 malware!
-sym.func_test : 0x40069c malware!
+sym._50b8e2ac2ef784a46a0f2f1747845365.constprop.2 : 0x2780sym._4babe4f6c160d26784ba5cf4efef8014 : 0x3750sym._f08eb03391a05fe97c6bc559af20ed12 : 0x48e0sym._cec9ecd3849e1f19ddd266d3818b66c4 : 0x3ca0sym._95cf89d3f6d601a3c7dc0765fa9d31be : 0x42a0
