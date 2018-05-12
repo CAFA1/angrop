@@ -4,7 +4,10 @@ from angr.sim_type import SimTypeFd, SimTypeChar, SimTypeArray, SimTypeLength
 ######################################
 # read
 ######################################
-
+def write_file(strmy):
+    result_log=open('/data/result.log','a')
+    result_log.write(strmy)
+    result_log.close()
 class read(angr.SimProcedure):
     #pylint:disable=arguments-differ
 
@@ -18,14 +21,13 @@ class read(angr.SimProcedure):
         length = self.state.posix.read(fd, dst, length)
         filename=self.state.posix.get_file(fd)
         #filter read passwd file
-        if(filename.name.find('passwd')!=-1):
+        if(filename.name.find('passwd')!=-1 or 1):
             print filename.name+' !!!'
-            fff=open('/tmp/find_read.flag','w')
-            fff.write(filename.name)
+            print "test!!!!"
+            fff=open('/data/find_read.flag','w')
             fff.close()
-        else:
-            #log every file name
-            fff=open('/tmp/find_read.flag','w')
-            fff.write(filename.name)
-            fff.close()
+            write_file(filename.name)
+
+
+
         return length

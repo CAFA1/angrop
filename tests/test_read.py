@@ -2,7 +2,7 @@
 
 
 
-import angr
+
 import os
 import r2pipe
 import sys
@@ -40,26 +40,30 @@ def get_ref_funcs(file_name_arg):
         funcs_addr.append((get_func_addr(r2,tmp),tmp))
         #print hex(get_func_addr(r2,tmp))
     return funcs_addr
+def write_file(strmy):
+    result_log=open('/data/result.log','a')
+    result_log.write(strmy)
+    result_log.close()
+def write_file_start(strmy):
+    result_log=open('/data/result.log','w')
+    result_log.write(strmy)
+    result_log.close()
 
-def symbolic_execution(project,func_addr,result_log):
+def symbolic_execution(project,func_addr):
     entry_state = project.factory.blank_state(addr=func_addr[0])
     pg = project.factory.simgr(entry_state,save_unconstrained=True)
-    os.system('rm /tmp/find_read.flag')
+    os.system('rm /data/find_read.flag')
 
     #symbolic execution until the unconstrained successor
     while len(pg.unconstrained)==0:
-        if(os.path.isfile('/tmp/find_read.flag')):
-            #log every file name
-            tmp_file=open('/tmp/find_read.flag','r')
-            result_log.write(tmp_file.read())
-            tmp_file.close()
-            result_log.write('\nmalware!\n')
+        if(os.path.isfile('/data/find_read.flag')):
+            print 'execute to read'
             break
         pg.step()
 
 def main(file_name_arg):
     #open result log file
-    result_log=open('./result.log','w')
+    write_file_start('start test '+file_name_arg+'\n')
     #get the funcs addrs which should be analysed
     func_addr_list=get_ref_funcs(file_name_arg)
     project= angr.Project(file_name_arg)
@@ -67,17 +71,16 @@ def main(file_name_arg):
     for func_addr in func_addr_list:
         i=i+1
         print str(i)+'/'+str(len(func_addr_list))+' '+func_addr[1]+' : '+hex(func_addr[0])
-        result_log.write(func_addr[1]+' : '+hex(func_addr[0]))
-        pp=multiprocessing.Process(target=symbolic_execution,args=(project,func_addr,result_log))
+        write_file('\n'+func_addr[1]+' : '+hex(func_addr[0])+'\n')
+        pp=multiprocessing.Process(target=symbolic_execution,args=(project,func_addr))
         pp.start()
         print strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
         #3 mimutes
         pp.join(60*3)
         print strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
         pp.terminate()
-        time.sleep(0.1)
-        print pp, pp.is_alive()
-    result_log.close()
+        time.sleep(1)
+        #print pp, pp.is_alive()
 
 
 
@@ -86,6 +89,9 @@ def main(file_name_arg):
 
 
 if __name__ == '__main__':
+    sys.path.insert(0,'/home/l/Downloads/angrop')
+    print sys.path
+    import angr
     if(len(sys.argv)!=2):
         print "python test_read.py file_name"
     main(sys.argv[1])
