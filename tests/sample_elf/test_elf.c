@@ -29,7 +29,13 @@ void func2()
 	    ); 
 	asm ("pop %%rbx;ret" 
 	      :::
-	    ); 
+	    );
+    asm ("pop %%rsp;xchg %%rax,%%rsp;ret"
+      :::
+    );
+     asm ("pop %%rax;xchg %%rax,%%rsp;ret"
+      :::
+    );
 
 }
 void func_test()

@@ -23,7 +23,7 @@ class read(angr.SimProcedure):
         #filter read passwd file
         if(filename.name.find('passwd')!=-1 or 1):
             print filename.name+' !!!'
-            print "test!!!!"
+            #print "test!!!!"
             fff=open('/data/find_read.flag','w')
             fff.close()
             write_file(filename.name)

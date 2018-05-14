@@ -90,7 +90,7 @@ def main(file_name_arg):
 
 if __name__ == '__main__':
     sys.path.insert(0,'/home/l/Downloads/angrop')
-    print sys.path
+    #print sys.path
     import angr
     if(len(sys.argv)!=2):
         print "python test_read.py file_name"
