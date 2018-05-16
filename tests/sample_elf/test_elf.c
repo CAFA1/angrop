@@ -36,6 +36,12 @@ void func2()
      asm ("pop %%rax;xchg %%rax,%%rsp;ret"
       :::
     );
+    asm ("mov (%%rbx), %%rax;ret"
+      :::
+    );
+    asm ("mov %%rbx, (%%rax);ret"
+      :::
+    );
 
 }
 void func_test()
