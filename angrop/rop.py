@@ -122,7 +122,7 @@ class ROP(Analysis):
         """
         self.gadgets = []
 
-        pool = Pool(processes=processes, initializer=_set_global_gadget_analyzer, initargs=(self._gadget_analyzer,))
+        pool = Pool(processes=1, initializer=_set_global_gadget_analyzer, initargs=(self._gadget_analyzer,))
 
         it = pool.imap_unordered(run_worker, self._addresses_to_check_with_caching(show_progress), chunksize=5)
         for gadget in it:
