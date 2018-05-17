@@ -116,7 +116,7 @@ class ROP(Analysis):
 
     def call_ropgadget(self,binary):
         import os
-        os.system('python ../ROPgadget/ROPgadget.py --nojop --binary '+binary+' >ropgadget.log')
+        os.system('python ../ROPgadget/ROPgadget.py --depth 20 --nojop --binary '+binary+' >ropgadget.log')
         file_log=open('./ropgadget.log','r')
         lines=file_log.readlines()
         file_log.close()
@@ -142,7 +142,7 @@ class ROP(Analysis):
 
         pool = Pool(processes=processes, initializer=_set_global_gadget_analyzer, initargs=(self._gadget_analyzer,))
 
-        it = pool.imap_unordered(run_worker, self._addresses_to_check_with_caching(show_progress), chunksize=5)
+        it = pool.imap_unordered(run_worker, self._addresses_to_check_with_caching_ropgadget(show_progress), chunksize=5)
         for gadget in it:
             if gadget is not None:
                 if isinstance(gadget, RopGadget):
@@ -303,6 +303,36 @@ class ROP(Analysis):
         self._cache = dict()
         seen = dict()
         for i, a in enumerate(self._addresses_to_check()):
+            if show_progress:
+                progress.update(i)
+            try:
+                bl = self.project.factory.block(a)
+                if bl.size > self._max_block_size:
+                    continue
+                block_data = bl.bytes
+            except (SimEngineError, SimMemoryError):
+                continue
+            if block_data in seen:
+                self._cache[seen[block_data]].add(a)
+                continue
+            else:
+                if len(bl.vex.constant_jump_targets) == 0 and not self._block_has_ip_relative(a, bl):
+                    seen[block_data] = a
+                    self._cache[a] = set()
+                yield a
+        if show_progress:
+            progress.finish()
+    def _addresses_to_check_with_caching_ropgadget(self, show_progress=True):
+        num_addrs = len(list(self._ropgadgets))
+        widgets = ['ROP: ', progressbar.Percentage(), ' ',
+                   progressbar.Bar(marker=progressbar.RotatingMarker()),
+                   ' ', progressbar.ETA(), ' ', progressbar.FileTransferSpeed()]
+        progress = progressbar.ProgressBar(widgets=widgets, maxval=num_addrs)
+        if show_progress:
+            progress.start()
+        self._cache = dict()
+        seen = dict()
+        for i, a in enumerate(self._ropgadgets):
             if show_progress:
                 progress.update(i)
             try:
