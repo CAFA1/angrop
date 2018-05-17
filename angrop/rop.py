@@ -76,6 +76,8 @@ class ROP(Analysis):
         self._ret_locations = self._get_ret_locations()
         # get ret gadgets locations from ropgadget
         self._ropgadgets = self.call_ropgadget(self.project.filename)
+        # get push ropgadget 
+        self._push_ropgadgets = self.push_ropgadget()
         # list of RopGadget's
         self.gadgets = []
         self.stack_pivots = []
@@ -113,7 +115,7 @@ class ROP(Analysis):
         logging.getLogger('angr.engines.vex.ccall').setLevel(logging.CRITICAL)
         logging.getLogger('angr.engines.vex.expressions.ccall').setLevel(logging.CRITICAL)
         logging.getLogger('angr.engines.vex.irop').setLevel(logging.CRITICAL)
-
+    # get _ropgadgets from ropgadget script
     def call_ropgadget(self,binary):
         import os
         os.system('python ../ROPgadget/ROPgadget.py --depth 20 --nojop --binary '+binary+' >ropgadget.log')
@@ -124,13 +126,32 @@ class ROP(Analysis):
         for line in lines:
             if(line.find(':')!=-1):
                 try:
-                    gadgets.append(int(line.split(':')[0],16))
+                    gadgets.append((int(line.split(':')[0],16),line.split(':')[1]))
                 except:
                     print 'warning: ropgadget  convert line : '+line
         #for i in gadgets:
         #    print hex(i)
         return gadgets
-
+    # get push ropgadgets
+    # (4195974, ' push rbp ; mov rbp, rsp ; xchg rax, rsp ; ret\n')
+    def push_ropgadget(self):
+        import re        
+        gadgets=[]
+        for line in self._ropgadgets:
+            push_addr=line[0]
+            asm_str=line[1]
+            
+            regex = re.search("^ push (?P<src>([(rax)|(rbx)|(rcx)|(rdx)|(rsi)|(rdi)|(r9)|(r10)|(r11)|(r12)|(r13)|(r14)|(r15)]{3}))", asm_str)
+            if regex:
+            
+                try:
+                    print 'find push: '+asm_str
+                    gadgets.append((push_addr,regex.group("src"),asm_str))
+                except:
+                    print 'warning: push_ropgadget  : '+asm_str
+        #for i in gadgets:
+        #    print hex(i)
+        return gadgets    
     def find_gadgets(self, processes=4, show_progress=True):
         """
         Finds all the gadgets in the binary by calling analyze_gadget on every address near a ret.
@@ -333,23 +354,24 @@ class ROP(Analysis):
         self._cache = dict()
         seen = dict()
         for i, a in enumerate(self._ropgadgets):
+            ropgadget_addr=a[0]
             if show_progress:
                 progress.update(i)
             try:
-                bl = self.project.factory.block(a)
+                bl = self.project.factory.block(ropgadget_addr)
                 if bl.size > self._max_block_size:
                     continue
                 block_data = bl.bytes
             except (SimEngineError, SimMemoryError):
                 continue
             if block_data in seen:
-                self._cache[seen[block_data]].add(a)
+                self._cache[seen[block_data]].add(ropgadget_addr)
                 continue
             else:
-                if len(bl.vex.constant_jump_targets) == 0 and not self._block_has_ip_relative(a, bl):
-                    seen[block_data] = a
-                    self._cache[a] = set()
-                yield a
+                if len(bl.vex.constant_jump_targets) == 0 and not self._block_has_ip_relative(ropgadget_addr, bl):
+                    seen[block_data] = ropgadget_addr
+                    self._cache[ropgadget_addr] = set()
+                yield ropgadget_addr
         if show_progress:
             progress.finish()
 
