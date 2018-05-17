@@ -74,7 +74,8 @@ class ROP(Analysis):
 
         # get ret locations
         self._ret_locations = self._get_ret_locations()
-
+        # get ret gadgets locations from ropgadget
+        self._ropgadgets = self.call_ropgadget(self.project.filename)
         # list of RopGadget's
         self.gadgets = []
         self.stack_pivots = []
@@ -112,6 +113,23 @@ class ROP(Analysis):
         logging.getLogger('angr.engines.vex.ccall').setLevel(logging.CRITICAL)
         logging.getLogger('angr.engines.vex.expressions.ccall').setLevel(logging.CRITICAL)
         logging.getLogger('angr.engines.vex.irop').setLevel(logging.CRITICAL)
+
+    def call_ropgadget(self,binary):
+        import os
+        os.system('python ../ROPgadget/ROPgadget.py --nojop --binary '+binary+' >ropgadget.log')
+        file_log=open('./ropgadget.log','r')
+        lines=file_log.readlines()
+        file_log.close()
+        gadgets=[]
+        for line in lines:
+            if(line.find(':')!=-1):
+                try:
+                    gadgets.append(int(line.split(':')[0],16))
+                except:
+                    print 'warning: ropgadget  convert line : '+line
+        #for i in gadgets:
+        #    print hex(i)
+        return gadgets
 
     def find_gadgets(self, processes=4, show_progress=True):
         """
