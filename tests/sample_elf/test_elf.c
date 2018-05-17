@@ -42,6 +42,9 @@ void func2()
     asm ("mov %%rbx, (%%rax);ret"
       :::
     );
+    asm ("mov %%rbx, %%rax;ret"
+      :::
+    );
 
 }
 void func_test()
