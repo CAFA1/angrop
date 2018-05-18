@@ -142,13 +142,38 @@ def find_popen(r2,file_name_arg):
     popen_str_list=popen_str.split('\n')
     my_open_addr_f=open('/mnt/hgfs/test1/addrs/'+file_name_arg.split('/')[-1]+'.popen','w')
     for tmp in popen_str_list:
+        if(tmp.find('[CALL]')==-1):
+            break
         popen_addr=tmp.split(' ')[1]
         print popen_addr
         my_open_addr_f.write(popen_addr+'\n')
     my_open_addr_f.close()
 
+def find_system(r2,file_name_arg):
+    #sym._b60293298036c511146dbe64f815cc65.constprop.1 0x401662 [CALL] call sym.imp.popen
+    popen_str = r2.cmd("axt sym.imp.system")
+    popen_str_list=popen_str.split('\n')
+    my_open_addr_f=open('/mnt/hgfs/test1/addrs/'+file_name_arg.split('/')[-1]+'.system','w')
+    for tmp in popen_str_list:
+        if(tmp.find('[CALL]')==-1):
+            break
+        popen_addr=tmp.split(' ')[1]
+        print popen_addr
+        my_open_addr_f.write(popen_addr+'\n')
+    my_open_addr_f.close()
 
-
+def find_recv(r2,file_name_arg):
+    #sym._b60293298036c511146dbe64f815cc65.constprop.1 0x401662 [CALL] call sym.imp.popen
+    popen_str = r2.cmd("axt sym.imp.recv")
+    popen_str_list=popen_str.split('\n')
+    my_open_addr_f=open('/mnt/hgfs/test1/addrs/'+file_name_arg.split('/')[-1]+'.recv','w')
+    for tmp in popen_str_list:
+        if(tmp.find('[CALL]')==-1):
+            break
+        popen_addr=tmp.split(' ')[1]
+        print popen_addr
+        my_open_addr_f.write(popen_addr+'\n')
+    my_open_addr_f.close()
 
 
 if __name__ == '__main__':
@@ -165,8 +190,12 @@ if __name__ == '__main__':
     r2.cmd("aaa;")
     #open result log file
     #write_file_start('start test '+file_name_arg+'\n')
+    print 'popen:'
     find_popen(r2,file_name_arg)
-    
+    print 'system:'
+    find_system(r2,file_name_arg)
+    print 'recv'
+    find_recv(r2,file_name_arg)
     print 'ok main'
 
 
