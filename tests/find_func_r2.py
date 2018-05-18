@@ -22,7 +22,7 @@ def get_file_name_strings(file_dir):
             this_file=os.path.join(root,file)
             out_bytes=subprocess.check_output(['file',os.path.join(root,file)])
             #print 'file output:\n'+out_bytes
-            if(out_bytes.find('ELF')!=-1):
+            if(out_bytes.find('ELF')!=-1 and out_bytes.find('LSB relocatable')==-1):
                 try:
                     out_bytes1=subprocess.check_output('strings '+os.path.join(root,file)+' |egrep '+string_interesting,shell=True)
                     print 'string output: '+out_bytes1
