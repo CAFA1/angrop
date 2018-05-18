@@ -26,7 +26,7 @@ class read(angr.SimProcedure):
             #print "test!!!!"
             fff=open('/data/find_read.flag','w')
             fff.close()
-            write_file(filename.name)
+            write_file('read file name: '+filename.name+'\n')
 
 
 

@@ -50,13 +50,22 @@ void func2()
     );
 
 }
-void func_test()
+void func_test(int i)
 {
     int fd;
     char buff[500];
-    fd=open("/etc/passwd",O_RDONLY);
-	read(fd,buff,500);
-	printf("%s\n",buff);
+    if(i==0)
+    {
+    	fd=open("/etc/passwd",O_RDONLY);
+    }else
+    {
+    	fd=open("./test_elf.c",O_RDONLY);
+    }
+    if(fd!=-1)
+    {
+		read(fd,buff,500);
+		printf("%s\n",buff);
+	}
 }
 void func_test1()
 {
@@ -76,7 +85,7 @@ int main(int argc,char*argv[])
 		printf("hello world!\n");
 	else
 		printf("hello\n");
-	func_test();
+	func_test(1);
 
 
 	return 1;
