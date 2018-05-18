@@ -182,3 +182,4 @@ autoWait()
 load_plugin('hexrays')
 main()
 #print decompile_func(here())
+#ida64.exe -S"D:\source\idapython\test.py" "D:\source\test1\install_dir\p_17\test_xcb_image_shm"
