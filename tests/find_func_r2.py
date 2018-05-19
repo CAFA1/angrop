@@ -62,10 +62,10 @@ if __name__ == '__main__':
     files_name=get_file_name_strings(dir2)
     for i in range(len(files_name)):
         print i,files_name[i]
-    optinstr='which file do you want to test[0-'+str(len(files_name))+']: '
+    optinstr='which file do you want to test[0-'+str(len(files_name)-1)+']: '
     input_file_int = input(optinstr)
     test_file=files_name[input_file_int]
 
     cp_cmd = 'python test_cp.py '+test_file+' '+dir1
     os.system(cp_cmd)
-    print 'ok'
+    print 'find_func_r2.py ok'
