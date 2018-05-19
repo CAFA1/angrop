@@ -3,6 +3,7 @@ import subprocess
 import r2pipe
 import sys
 #return file name
+work_dir='/home/l/Downloads/test/'
 def get_file_name(file_dir):
     file_elf=[]
     for root,dirs,files in os.walk(file_dir):
@@ -17,6 +18,7 @@ def get_file_name_strings(file_dir):
     #system
     string_interesting='"evil|system|read|recv|popen"'
     file_elf=[]
+    i=0
     for root,dirs,files in os.walk(file_dir):
         for file in files:
             this_file=os.path.join(root,file)
@@ -27,8 +29,9 @@ def get_file_name_strings(file_dir):
                     out_bytes1=subprocess.check_output('strings '+os.path.join(root,file)+' |egrep '+string_interesting,shell=True)
                     print 'string output: '+out_bytes1
                     if(out_bytes1!=''):
-                        print 'find file : '+this_file+' !!!!!!'
+                        print 'find file : '+this_file+' !!!!!!' + ' '+str(i)
                         file_elf.append(this_file)
+                        i=i+1
                 except:
                     pass
     return file_elf
@@ -49,12 +52,20 @@ def get_func_elf(file_name_list,func_name):
 
 if __name__ == '__main__':
     #main()
+    work_dir='/home/l/Downloads/test/'
     if(len(sys.argv)!=2):
         print "python find_func_r2.py dir"
         exit()
     dir1= sys.argv[1]
+    dir2=work_dir+dir1
     #string1 = sys.argv[2]
-    files_name=get_file_name_strings(dir1)
-    
-    print 'python test_cp.py find_file'
+    files_name=get_file_name_strings(dir2)
+    for i in range(len(files_name)):
+        print i,files_name[i]
+    optinstr='which file do you want to test[0-'+str(len(files_name))+']: '
+    input_file_int = input(optinstr)
+    test_file=files_name[input_file_int]
+
+    cp_cmd = 'python test_cp.py '+test_file+' '+dir1
+    os.system(cp_cmd)
     print 'ok'
