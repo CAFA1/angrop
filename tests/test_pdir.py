@@ -130,7 +130,78 @@ def test_system(mylog,file_name_path):
 			if(flag_out==0):
 				mylog.write(',no\n')
 				print ',no'					
-			
+
+def test_read(mylog,file_name_path):
+	global work_dir
+	file_name=os.path.basename(file_name_path)
+	p_dir=os.path.dirname(file_name_path).split('\\')[-1]
+	addrs=get_analysis_funcs_addr_name(work_dir+'addrs\\'+p_dir+'\\'+file_name+'.read')
+	#addrs=get_analysis_funcs_addr_name(work_dir+'addrs\\'+file_name+'.system')
+	
+	for addr_tuple in addrs:
+		addr=addr_tuple[0]
+		f = addr_tuple[1]
+		if(f is not None ):
+			flag_out=0
+			mylog.write('start read analysis func: '+f)
+			print 'start read analysis func: '+f,
+						
+			c_lines=ida_disassam(file_name_path,addr)
+			all_lines='\n'.join(c_lines)
+			lines_num=len(c_lines)
+			#if(all_lines.find('open(')!=-1 ):
+			if(len(c_lines)==0):
+				print 'decompile_func error'
+			else:
+				if(all_lines.find('open(')!=-1):
+					recv_lines=[]
+					taint_values=[]
+					#1. find recv value
+					for i in range(lines_num):
+						if(flag_out):
+							break
+						#v14 = open("/usr/local/etc/nginx/nginx.conf", 0);
+						#v15 = read(v14, _1b756b3aa8862d7730209615be62831e, 0x400uLL);
+						regex=re.search('(?P<dst>(.*)) = open\("(?P<src>(.*))", .*\)',c_lines[i])
+						if regex:
+							file_name_open=regex.group('src')
+							file_handle=regex.group('dst').strip(' ').strip('*')
+							print 'file name open: '+file_name_open
+							regex_file_name=re.search('(nginx\.conf|passwd)',file_name_open)
+							if(regex_file_name):
+								recv_lines.append((i,file_handle))
+								taint_values.append(file_handle)
+					#2. find taint value from =
+					for (tmp_i,tmp_recv_value) in recv_lines:
+						for i in range(0,tmp_i):
+							
+							#v14 = open("/usr/local/etc/nginx/nginx.conf", 0);
+							regex_recv=re.search('(?P<src>(.*)) = '+tmp_recv_value+'.*;',c_lines[i])
+							if regex_recv:
+								taint_value=regex_recv.group('src').strip(' ').strip('*')
+								taint_values.append(taint_value)					
+					#3. find system call 
+					for taint_value1 in taint_values:
+						if(flag_out==1):
+							break
+						#print taint_value1
+						for (tmp_i,tmp_recv_value) in recv_lines:
+							if(flag_out==1):
+								break
+							for i in range(tmp_i,lines_num):
+								#v15 = read(v14, _1b756b3aa8862d7730209615be62831e, 0x400uLL);
+								regex_recv1=re.search('read\(.*'+taint_value1+', (.*), .*\)',c_lines[i])
+								if regex_recv1:
+									mylog.write(',yes\n')
+									print ',yes'
+									flag_out=1
+									break					
+					
+					
+			if(flag_out==0):
+				mylog.write(',no\n')
+				print ',no'	
+
 def test_recv_shellcode(mylog,file_name_path):
 	global work_dir
 	file_name=os.path.basename(file_name_path)
@@ -143,7 +214,7 @@ def test_recv_shellcode(mylog,file_name_path):
 		if(f is not None ):
 			flag_out=0
 			mylog.write('start recv_shellcode analysis func: '+f)
-			print 'start recv_shellcode analysis func: '+f,
+			print 'start recv_shellcode analysis func: '+f
 			
 			#c_lines=decompile_func(addr)
 			c_lines=ida_disassam(file_name_path,addr)
@@ -162,6 +233,10 @@ def test_recv_shellcode(mylog,file_name_path):
 					regex=re.search('recv\((.*), (?P<src>(.*)), (.*), .*\)',c_lines[i])
 					if regex:
 						recv_value=regex.group('src')
+						index_1=recv_value.find('*')
+						if(index_1!=-1):
+							recv_value=recv_value[index_1+1:]
+						print str(i),recv_value
 						recv_lines.append((i,recv_value))
 						taint_values.append(recv_value)
 						#print recv_value
@@ -212,6 +287,8 @@ def main(file_name_path):
 	test_system(mylog,file_name_path)
 	print 'start recv_shellcode analysis'	
 	test_recv_shellcode(mylog,file_name_path)
+	print 'start read analysis'
+	test_read(mylog,file_name_path)
 	mylog.close()
 	print 'ok'
 	#idc.Exit(0)
