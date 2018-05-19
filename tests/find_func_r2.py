@@ -56,5 +56,5 @@ if __name__ == '__main__':
     #string1 = sys.argv[2]
     files_name=get_file_name_strings(dir1)
     
-    #funcs1=get_func_elf(funcs,'parse_tiff_ifd')
+    print 'python test_cp.py find_file'
     print 'ok'

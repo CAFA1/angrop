@@ -9,12 +9,21 @@ import sys
 import multiprocessing, time
 from time import gmtime, strftime
 import copy
-
+mnt_dir='/mnt/hgfs/test1/'
 def find_call_func_addr(r2,file_name_arg,func_name):
+    global mnt_dir
     #sym._b60293298036c511146dbe64f815cc65.constprop.1 0x401662 [CALL] call sym.imp.popen
     popen_str = r2.cmd("axt "+func_name)
     popen_str_list=popen_str.split('\n')
-    my_open_addr_f=open('/mnt/hgfs/test1/addrs/'+os.path.basename(file_name_arg)+'.'+func_name.split('.')[-1],'w')
+    base_name=os.path.basename(file_name_arg)
+    p_dir=os.path.dirname(file_name_arg).split('/')[-1]+'/'
+    mnt_p_dir=mnt_dir+'addrs/'+p_dir
+    try:
+        os.makedirs(mnt_p_dir,0777)
+    except:
+        print 'dir already exists.' 
+
+    my_open_addr_f=open(mnt_p_dir+base_name+'.'+func_name.split('.')[-1],'w')
     tmp_set=set()
     for tmp in popen_str_list:
         if(tmp.find('[CALL]')==-1):
@@ -49,6 +58,9 @@ if __name__ == '__main__':
     print 'recv'
     #find_recv(r2,file_name_arg)
     find_call_func_addr(r2,file_name_arg,'sym.imp.recv')
+    p_dir=os.path.dirname(file_name_arg).split('/')[-1]+'\\'
+    base_name=os.path.basename(file_name_arg)
+    print "windows: cd /d D:\\source\\idapython\npython test.py D:\\source\\test1\\install_dir\\"+p_dir+base_name
     print 'ok main'
 
 
