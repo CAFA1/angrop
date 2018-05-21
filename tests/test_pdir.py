@@ -65,7 +65,90 @@ def test_popen(mylog,file_name_path):
 			if(test_func_flag==0):
 				mylog.write(',no\n')
 				print ',no'
+#execl(path, "/bin/sh", 0LL);
+def test_execl(mylog,file_name_path):
+	global work_dir
+	file_name=os.path.basename(file_name_path)
+	p_dir=os.path.dirname(file_name_path).split('\\')[-1]
+	addrs=get_analysis_funcs_addr_name(work_dir+'addrs\\'+p_dir+'\\'+file_name+'.execl')
+	#addrs=get_analysis_funcs_addr_name(work_dir+'addrs\\'+file_name+'.system')
+	
+	for addr_tuple in addrs:
+		addr=addr_tuple[0]
+		f = addr_tuple[1]
+		if(f is not None ):
+			flag_out=0
+			mylog.write('start execl analysis func: '+f)
+			print 'start execl analysis func: '+f,
+						
+			c_lines=ida_disassam(file_name_path,addr)
+			all_lines='\n'.join(c_lines)
+			lines_num=len(c_lines)
+			if(len(c_lines)==0):
+				print 'decompile_func error'
+			else:
+				if(all_lines.find('dup2(')!=-1):
+					recv_lines=[]
+					taint_values=[]
+					#1. find recv value
+					for i in range(lines_num):
+						if(flag_out):
+							break
+						#execl(path, "/bin/sh", 0LL);
+						regex=re.search('execl\(.*"/bin/sh".*\)',c_lines[i])
+						
+						if regex:
+							print regex.group()
+							mylog.write(',yes\n')
+							print ',yes'
+							flag_out=1
+							break					
 					
+					
+			if(flag_out==0):
+				mylog.write(',no\n')
+				print ',no'	
+#execl(path, "/bin/sh", 0LL);
+def test_system1(mylog,file_name_path):
+	global work_dir
+	file_name=os.path.basename(file_name_path)
+	p_dir=os.path.dirname(file_name_path).split('\\')[-1]
+	addrs=get_analysis_funcs_addr_name(work_dir+'addrs\\'+p_dir+'\\'+file_name+'.system')
+	#addrs=get_analysis_funcs_addr_name(work_dir+'addrs\\'+file_name+'.system')
+	
+	for addr_tuple in addrs:
+		addr=addr_tuple[0]
+		f = addr_tuple[1]
+		if(f is not None ):
+			flag_out=0
+			mylog.write('start system1 analysis func: '+f)
+			print 'start system1 analysis func: '+f,
+						
+			c_lines=ida_disassam(file_name_path,addr)
+			all_lines='\n'.join(c_lines)
+			lines_num=len(c_lines)
+			if(len(c_lines)==0):
+				print 'decompile_func error'
+			else:
+				if(all_lines.find('dup2(')!=-1):
+					recv_lines=[]
+					taint_values=[]
+					#1. find recv value
+					for i in range(lines_num):
+						if(flag_out):
+							break
+						#execl(path, "/bin/sh", 0LL);
+						regex=re.search('system\(.*"/bin/sh".*\)',c_lines[i])
+						if regex:
+							mylog.write(',yes\n')
+							print ',yes'
+							flag_out=1
+							break					
+					
+					
+			if(flag_out==0):
+				mylog.write(',no\n')
+				print ',no'							
 def test_system(mylog,file_name_path):
 	global work_dir
 	file_name=os.path.basename(file_name_path)
@@ -285,10 +368,13 @@ def main(file_name_path):
 	test_popen(mylog,file_name_path)
 	print 'start system analysis'
 	test_system(mylog,file_name_path)
+	test_system1(mylog,file_name_path)
 	print 'start recv_shellcode analysis'	
 	test_recv_shellcode(mylog,file_name_path)
 	print 'start read analysis'
 	test_read(mylog,file_name_path)
+	print 'start execl analysis'
+	test_execl(mylog,file_name_path)
 	mylog.close()
 	print 'ok'
 	#idc.Exit(0)
