@@ -16,7 +16,7 @@ def get_file_name(file_dir):
 #return file name
 def get_file_name_strings(file_dir):
     #system
-    string_interesting='"evil|system|read|recv|popen"'
+    string_interesting='"evil|system|read|recv|popen|hack|exec|setuid|http|send|write"'
     file_elf=[]
     i=0
     for root,dirs,files in os.walk(file_dir):

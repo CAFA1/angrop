@@ -14,6 +14,7 @@ def find_call_func_addr(p_dir,r2,file_name_arg,func_name):
     global mnt_dir
     #sym._b60293298036c511146dbe64f815cc65.constprop.1 0x401662 [CALL] call sym.imp.popen
     popen_str = r2.cmd("axt "+func_name)
+    print popen_str
     popen_str_list=popen_str.split('\n')
     base_name=os.path.basename(file_name_arg)
     #p_dir=os.path.dirname(file_name_arg).split('/')[-1]+'/'
@@ -69,6 +70,8 @@ if __name__ == '__main__':
     find_call_func_addr(p_dir,r2,file_name_arg,'sym.imp.recv')
     print 'read'
     find_call_func_addr(p_dir,r2,file_name_arg,'sym.imp.read')
+    print 'execl'
+    find_call_func_addr(p_dir,r2,file_name_arg,'sym.imp.execl')
 
     base_name=os.path.basename(file_name_arg)
     print "windows:!!!!!\ncd /d D:\\source\\idapython\npython test.py D:\\source\\test1\\install_dir\\"+p_dir+'\\'+base_name
